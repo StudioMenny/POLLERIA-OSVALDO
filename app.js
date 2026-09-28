@@ -198,19 +198,34 @@ function polleriaToast(message) {
 })();
 
 // ===== Brace che sale dal fuoco (home) =====
+// Versione leggera: ogni scintilla è un'immagine pre-disegnata una sola volta (niente ombre calcolate
+// a ogni fotogramma), massimo 30 fotogrammi al secondo, e l'animazione si ferma appena l'hero
+// inizia a uscire dallo schermo.
 (function () {
   var canvas = document.querySelector('.embers');
   if (!canvas || !canvas.getContext) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var ctx = canvas.getContext('2d');
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var W = 0, H = 0, sparks = [], running = false, raf = null;
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  var W = 0, H = 0, sparks = [], running = false, raf = null, last = 0;
+  var FRAME = 1000 / 30;
+
+  // Scintilla pre-disegnata (bagliore compreso)
+  var sprite = document.createElement('canvas');
+  sprite.width = sprite.height = 24;
+  var sctx = sprite.getContext('2d');
+  var g = sctx.createRadialGradient(12, 12, 0, 12, 12, 12);
+  g.addColorStop(0, 'rgba(255, 220, 150, 1)');
+  g.addColorStop(0.25, 'rgba(255, 140, 60, 0.9)');
+  g.addColorStop(1, 'rgba(255, 90, 30, 0)');
+  sctx.fillStyle = g;
+  sctx.fillRect(0, 0, 24, 24);
 
   function size() {
     var r = canvas.getBoundingClientRect();
     W = r.width; H = r.height;
-    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
@@ -218,61 +233,61 @@ function polleriaToast(message) {
     return {
       x: Math.random() * W,
       y: initial ? Math.random() * H : H + 10,
-      r: 0.6 + Math.random() * 1.8,
-      vy: 0.35 + Math.random() * 0.9,
-      vx: (Math.random() - 0.5) * 0.3,
+      s: 5 + Math.random() * 8,
+      vy: 0.7 + Math.random() * 1.6,
+      vx: (Math.random() - 0.5) * 0.5,
       life: 0,
-      max: 220 + Math.random() * 260,
-      hue: 18 + Math.random() * 26
+      max: 110 + Math.random() * 130
     };
   }
 
   function init() {
     size();
-    var n = W < 700 ? 16 : 40;
+    var n = W < 700 ? 12 : 26;
     sparks = [];
     for (var i = 0; i < n; i++) sparks.push(spawn(true));
   }
 
-  function frame() {
+  function frame(t) {
+    if (!running) return;
+    raf = requestAnimationFrame(frame);
+    if (t - last < FRAME) return;
+    last = t;
+
     ctx.clearRect(0, 0, W, H);
-    ctx.globalCompositeOperation = 'lighter';
     for (var i = 0; i < sparks.length; i++) {
       var s = sparks[i];
       s.life++;
       s.y -= s.vy;
-      s.x += s.vx + Math.sin((s.life + i * 20) / 40) * 0.25;
-      var t = s.life / s.max;
-      var alpha = t < 0.15 ? t / 0.15 : 1 - t;
+      s.x += s.vx + Math.sin((s.life + i * 20) / 20) * 0.35;
       if (s.life > s.max || s.y < -10) { sparks[i] = spawn(false); continue; }
-      ctx.beginPath();
-      ctx.fillStyle = 'hsla(' + s.hue + ', 100%, 60%, ' + (alpha * 0.85).toFixed(3) + ')';
-      ctx.shadowColor = 'hsla(' + s.hue + ', 100%, 55%, 1)';
-      ctx.shadowBlur = 8;
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
+      var k = s.life / s.max;
+      ctx.globalAlpha = k < 0.15 ? k / 0.15 : 1 - k;
+      ctx.drawImage(sprite, s.x - s.s / 2, s.y - s.s / 2, s.s, s.s);
     }
-    ctx.shadowBlur = 0;
-    if (running) raf = requestAnimationFrame(frame);
+    ctx.globalAlpha = 1;
   }
 
-  function start() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
+  function start() { if (!running) { running = true; last = 0; raf = requestAnimationFrame(frame); } }
   function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
 
   init();
-  window.addEventListener('resize', function () { init(); });
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(init, 200);
+  });
 
-  // Si ferma quando l'hero non è visibile o la scheda è in background: niente consumi inutili
+  var visible = true;
   if (window.IntersectionObserver) {
     new IntersectionObserver(function (entries) {
-      entries[0].isIntersecting ? start() : stop();
-    }).observe(canvas);
+      visible = entries[0].intersectionRatio > 0.6;
+      visible && !document.hidden ? start() : stop();
+    }, { threshold: [0, 0.6, 1] }).observe(canvas);
   } else {
     start();
   }
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { stop(); return; }
-    var r = canvas.getBoundingClientRect();
-    if (r.bottom > 0 && r.top < window.innerHeight) start();
+    document.hidden || !visible ? stop() : start();
   });
 })();
