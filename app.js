@@ -197,10 +197,9 @@ function polleriaToast(message) {
   setInterval(render, 30000);
 })();
 
-// ===== Brace che sale dal fuoco (home) =====
-// Versione leggera: ogni scintilla è un'immagine pre-disegnata una sola volta (niente ombre calcolate
-// a ogni fotogramma), massimo 30 fotogrammi al secondo, e l'animazione si ferma appena l'hero
-// inizia a uscire dallo schermo.
+// ===== Fumo dello spiedo (home) =====
+// Poche volute di fumo morbide che salgono lente: ogni volute è un'immagine pre-disegnata una sola
+// volta, massimo 30 fotogrammi al secondo, e l'animazione si ferma appena l'hero esce dallo schermo.
 (function () {
   var canvas = document.querySelector('.embers');
   if (!canvas || !canvas.getContext) return;
@@ -208,19 +207,23 @@ function polleriaToast(message) {
 
   var ctx = canvas.getContext('2d');
   var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-  var W = 0, H = 0, sparks = [], running = false, raf = null, last = 0;
+  var W = 0, H = 0, puffs = [], specks = [], running = false, raf = null, last = 0;
   var FRAME = 1000 / 30;
 
-  // Scintilla pre-disegnata (bagliore compreso)
-  var sprite = document.createElement('canvas');
-  sprite.width = sprite.height = 24;
-  var sctx = sprite.getContext('2d');
-  var g = sctx.createRadialGradient(12, 12, 0, 12, 12, 12);
-  g.addColorStop(0, 'rgba(255, 220, 150, 1)');
-  g.addColorStop(0.25, 'rgba(255, 140, 60, 0.9)');
-  g.addColorStop(1, 'rgba(255, 90, 30, 0)');
-  sctx.fillStyle = g;
-  sctx.fillRect(0, 0, 24, 24);
+  function makeSprite(px, stops) {
+    var c = document.createElement('canvas');
+    c.width = c.height = px;
+    var x = c.getContext('2d');
+    var g = x.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2);
+    stops.forEach(function (st) { g.addColorStop(st[0], st[1]); });
+    x.fillStyle = g;
+    x.fillRect(0, 0, px, px);
+    return c;
+  }
+
+  // Volute di fumo chiaro e qualche granello dorato di spezie che sale con il calore
+  var smoke = makeSprite(128, [[0, 'rgba(242, 238, 223, 0.55)'], [0.45, 'rgba(242, 238, 223, 0.18)'], [1, 'rgba(242, 238, 223, 0)']]);
+  var speck = makeSprite(16, [[0, 'rgba(255, 226, 150, 1)'], [0.4, 'rgba(232, 184, 78, 0.7)'], [1, 'rgba(232, 184, 78, 0)']]);
 
   function size() {
     var r = canvas.getBoundingClientRect();
@@ -229,24 +232,41 @@ function polleriaToast(message) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  function spawn(initial) {
+  function newPuff(initial) {
+    return {
+      x: W * (0.45 + Math.random() * 0.55),
+      y: initial ? Math.random() * H : H + 80,
+      s: 90 + Math.random() * 110,
+      grow: 0.35 + Math.random() * 0.4,
+      vy: 0.35 + Math.random() * 0.45,
+      vx: -0.15 + Math.random() * 0.3,
+      life: initial ? Math.random() * 300 : 0,
+      max: 380 + Math.random() * 220,
+      peak: 0.08 + Math.random() * 0.07
+    };
+  }
+
+  function newSpeck(initial) {
     return {
       x: Math.random() * W,
-      y: initial ? Math.random() * H : H + 10,
-      s: 5 + Math.random() * 8,
-      vy: 0.7 + Math.random() * 1.6,
-      vx: (Math.random() - 0.5) * 0.5,
+      y: initial ? Math.random() * H : H + 6,
+      s: 3 + Math.random() * 4,
+      vy: 0.5 + Math.random() * 0.9,
+      vx: (Math.random() - 0.5) * 0.3,
       life: 0,
-      max: 110 + Math.random() * 130
+      max: 160 + Math.random() * 160
     };
   }
 
   function init() {
     size();
-    var n = W < 700 ? 12 : 26;
-    sparks = [];
-    for (var i = 0; i < n; i++) sparks.push(spawn(true));
+    var small = W < 700;
+    puffs = []; specks = [];
+    for (var i = 0; i < (small ? 6 : 11); i++) puffs.push(newPuff(true));
+    for (var j = 0; j < (small ? 6 : 12); j++) specks.push(newSpeck(true));
   }
+
+  function fade(k) { return k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8; }
 
   function frame(t) {
     if (!running) return;
@@ -255,15 +275,26 @@ function polleriaToast(message) {
     last = t;
 
     ctx.clearRect(0, 0, W, H);
-    for (var i = 0; i < sparks.length; i++) {
-      var s = sparks[i];
+
+    for (var i = 0; i < puffs.length; i++) {
+      var p = puffs[i];
+      p.life++;
+      p.y -= p.vy;
+      p.x += p.vx + Math.sin((p.life + i * 40) / 60) * 0.25;
+      p.s += p.grow;
+      if (p.life > p.max || p.y < -p.s) { puffs[i] = newPuff(false); continue; }
+      ctx.globalAlpha = fade(p.life / p.max) * p.peak;
+      ctx.drawImage(smoke, p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+    }
+
+    for (var j = 0; j < specks.length; j++) {
+      var s = specks[j];
       s.life++;
       s.y -= s.vy;
-      s.x += s.vx + Math.sin((s.life + i * 20) / 20) * 0.35;
-      if (s.life > s.max || s.y < -10) { sparks[i] = spawn(false); continue; }
-      var k = s.life / s.max;
-      ctx.globalAlpha = k < 0.15 ? k / 0.15 : 1 - k;
-      ctx.drawImage(sprite, s.x - s.s / 2, s.y - s.s / 2, s.s, s.s);
+      s.x += s.vx + Math.sin((s.life + j * 25) / 25) * 0.3;
+      if (s.life > s.max || s.y < -10) { specks[j] = newSpeck(false); continue; }
+      ctx.globalAlpha = fade(s.life / s.max) * 0.8;
+      ctx.drawImage(speck, s.x - s.s / 2, s.y - s.s / 2, s.s, s.s);
     }
     ctx.globalAlpha = 1;
   }
@@ -290,4 +321,16 @@ function polleriaToast(message) {
   document.addEventListener('visibilitychange', function () {
     document.hidden || !visible ? stop() : start();
   });
+})();
+
+// ===== Colori della nuova palette applicati anche a ciò che sta nell'HTML =====
+// (barra del browser su telefono e sfumatura del quadrante), così non serve ricaricare le pagine HTML
+(function () {
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', '#121710');
+  var stops = document.querySelectorAll('#dialGrad stop');
+  if (stops.length === 2) {
+    stops[0].setAttribute('stop-color', '#9CC07A');
+    stops[1].setAttribute('stop-color', '#E8B84E');
+  }
 })();
