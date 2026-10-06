@@ -785,3 +785,16 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 
 /* Card "Dove siamo" con la foto del negozio sullo sfondo */
 .c-where { background: linear-gradient(90deg, var(--carbone) 35%, rgba(27, 34, 24, 0.55)), url("images/negozio.jpg") right center / cover; min-height: 300px; }
+
+/* ---------- Intestazione su telefono: la scritta di stato va a capo invece di spingere fuori il carrello ---------- */
+@media (max-width: 900px) {
+  .brand { flex: 1 1 auto; min-width: 0; }
+  .brand-text { min-width: 0; }
+  .brand-text .brand-status { white-space: normal; line-height: 1.25; align-items: flex-start; }
+  .brand-text .brand-status::before { margin-top: 0.35em; flex: none; }
+  .cart-btn { flex: none; }
+}
+
+/* Calcolatore feste su telefono: il bagliore decorativo resta dentro il riquadro */
+.party-result { isolation: isolate; }
+@media (max-width: 900px) { .party-result { position: relative; } }

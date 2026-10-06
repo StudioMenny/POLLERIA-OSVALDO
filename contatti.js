@@ -24,7 +24,7 @@
         'ORG:La Polleria di Pelizza Lalla & C. snc',
         'TEL;TYPE=WORK,VOICE:' + POLLERIA.phone,
         'EMAIL;TYPE=WORK:' + POLLERIA.email,
-        'ADR;TYPE=WORK:;;Via Palmino Sterzi 41;Nogara;VR;;Italia',
+        'ADR;TYPE=WORK:;;Via dei Mercanti 14;Nogara;VR;;Italia',
         'URL:' + site,
         'NOTE:Aperto tutti i giorni 10-19, chiuso il martedì',
         'END:VCARD'
