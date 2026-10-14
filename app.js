@@ -327,10 +327,10 @@ function polleriaToast(message) {
 // (barra del browser su telefono e sfumatura del quadrante), così non serve ricaricare le pagine HTML
 (function () {
   var meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', '#121710');
+  if (meta) meta.setAttribute('content', '#FBF3E4');
   var stops = document.querySelectorAll('#dialGrad stop');
   if (stops.length === 2) {
-    stops[0].setAttribute('stop-color', '#9CC07A');
-    stops[1].setAttribute('stop-color', '#E8B84E');
+    stops[0].setAttribute('stop-color', '#F2B027');
+    stops[1].setAttribute('stop-color', '#C8361E');
   }
 })();

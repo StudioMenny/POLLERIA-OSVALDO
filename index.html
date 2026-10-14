@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>La Polleria, pollo allo spiedo a Nogara</title>
   <meta name="description" content="Pollo allo spiedo cotto sul fuoco vivo, fritti e panini in Via dei Mercanti 14 a Nogara. Ordina su WhatsApp, ritiro o consegna a domicilio.">
-  <meta name="theme-color" content="#1E120B">
+  <meta name="theme-color" content="#FBF3E4">
   <link rel="icon" href="images/logo.png">
   <meta property="og:title" content="La Polleria, pollo allo spiedo a Nogara">
   <meta property="og:description" content="Pollo allo spiedo cotto sul fuoco vivo, fritti e panini in Via dei Mercanti 14 a Nogara. Ordina su WhatsApp, ritiro o consegna a domicilio.">
   <meta property="og:image" content="https://studiomenny.github.io/POLLERIA-OSVALDO/images/hero-spiedo.jpg">
   <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -49,20 +49,31 @@
 <main id="main">
 
   <section class="hero">
-    <canvas class="embers" aria-hidden="true"></canvas>
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <h1>Il pollo gira sul fuoco da stamattina.</h1>
-        <p class="hero-lead">Pollo allo spiedo, fritti croccanti e panini in Via dei Mercanti 14 a Nogara. Da portare via, da mangiare a un tavolino o da farti portare a casa.</p>
-        <div class="hero-cta">
-          <a class="btn btn-fire" href="menu.html">Scegli dal menù</a>
-          <a class="btn btn-line" href="feste.html">Calcola per il tuo gruppo</a>
-        </div>
+    <div class="wrap hero-head">
+      <p class="hero-kicker"><span class="kicker-pill">Rosticceria</span> Via dei Mercanti 14 · Nogara</p>
+      <h1>Il pollo <span class="h1-red">gira</span><br>dalle dieci.</h1>
+      <p class="hero-lead">Pollo allo spiedo, fritti croccanti e panini. Da portare via, da mangiare a un tavolino o da farti portare a casa.</p>
+      <div class="hero-cta">
+        <a class="btn btn-fire" href="menu.html">Scegli dal menù</a>
+        <a class="btn btn-line" href="feste.html">Calcola per il tuo gruppo</a>
       </div>
+    </div>
 
-      <div class="hero-visual">
-        <div class="hero-photo"><img src="images/spiedo-scuro.jpg" alt="Pollo allo spiedo dorato sulla brace" width="720" height="906"></div>
-        <aside class="dial-card" aria-live="polite" aria-label="Orari di oggi">
+    <div class="wrap hero-stage">
+      <div class="hero-photo">
+        <img src="images/hero-spiedo.jpg" alt="Polli allo spiedo dorati che girano nel girarrosto" width="1200" height="800">
+        <a class="tag tag--a" href="menu.html#pollo"><span>Pollo intero</span><b>13 €</b></a>
+        <a class="tag tag--b" href="menu.html#pollo"><span>Mezzo pollo</span><b>7 €</b></a>
+      </div>
+      <svg class="stamp" viewBox="0 0 200 200" aria-hidden="true">
+        <defs><path id="stampCircle" d="M100,100 m-72,0 a72,72 0 1,1 144,0 a72,72 0 1,1 -144,0"/></defs>
+        <circle cx="100" cy="100" r="96" class="stamp-bg"/>
+        <circle cx="100" cy="100" r="54" class="stamp-inner"/>
+        <g class="stamp-ring"><text><textPath href="#stampCircle">COTTO SUL FUOCO VIVO · OGNI GIORNO · </textPath></text></g>
+        <text x="100" y="98" class="stamp-big">DAL</text>
+        <text x="100" y="120" class="stamp-big">BANCO</text>
+      </svg>
+      <aside class="dial-card" aria-live="polite" aria-label="Orari di oggi">
           <svg class="dial" viewBox="0 0 220 180" role="img" aria-label="Quadrante degli orari di apertura, dalle 10 alle 19">
             <defs>
               <linearGradient id="dialGrad" x1="0" y1="1" x2="1" y2="0">
@@ -80,9 +91,9 @@
             <span data-dial-detail>Tutti i giorni 10–19, martedì chiuso</span>
           </div>
         </aside>
-      </div>
     </div>
   </section>
+  <div class="gingham-band" aria-hidden="true"></div>
 
   <section class="wrap" aria-labelledby="modes-title">
     <h2 class="visually-hidden" id="modes-title">Come puoi mangiarlo</h2>
